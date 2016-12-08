@@ -74,7 +74,7 @@
  * Send and save.
  * Last step is to actually send the tweet to Twitter. For this, TwitterOAuth
  * (https://twitteroauth.com/) is used. Also, if it made it to Twitter, save the
- * tweet in a file, called "save_trivia.txt".
+ * tweet in a file, called "saved_trivia.txt".
  *
  * If the end value is not Twitter-friendly the script gets reloaded, and
  * everything starts over.
