@@ -56,24 +56,27 @@
  * regex rules. (Note: this cut-out process is a bit flaky, the regex rules here
  * have to be improved. Occassionally, it can't determine the exact end point of
  * a link tag and it results in text bits chopped out.)
- * Now, if the script has gotten this far, it is good to look up the title of the
- * given page, which is a person's name or a movie's title.
+ * Now, if the script has gotten this far, it is safe to look up the title of the
+ * given page, which is a person's name or a movie's title. Save it into a
+ * variable and turn it into a hashtag as well. The title will be used in
+ * front of the actual tweet, and occassionally its hashtag at the end.
  *
  * Every character gets counted and added together. Titles or names and trivia.
  *
  * Build up the tweet.
  * Twitter-friendliness is depending on several factors. First, if the overall
- * character-count is below 15, skip everything and reload the script. It can't
- * be sensible. Then, there are different rules for various character lengths.
- * (Twitter lets 140 characters in a tweet, and its built-in url shortener will 
- * reduce any urls down to 23 character.)
+ * character-count is below 15, skip everything and reload the script -- it can't
+ * be a sensible message.
+ * Then, there are different rules for various character lengths.
+ * Twitter lets 140 characters in a tweet, and its built-in url shortener will 
+ * reduce any urls down to 23 character.
  * So, count everything in every condition and if the number of characters lets
  * it, append one or more hashtags at the end of the tweet, plus the IMDB url of
  * the movie or person.
  *
  * Send and save.
- * Last step is to actually send the tweet to Twitter. For this, TwitterOAuth
- * (https://twitteroauth.com/) is used. Also, if it made it to Twitter, save the
+ * As last steps send the tweet to Twitter, [for this, TwitterOAuth
+ * (https://twitteroauth.com/)] is used, and if it made it to Twitter, save the
  * tweet in a file, called "saved_trivia.txt".
  *
  * If the end value is not Twitter-friendly the script gets reloaded, and
@@ -198,41 +201,94 @@
     $title_length = strlen($title_match[0]);
     $trivia_length = strlen($trivia_replace2);
     $char_length = $trivia_length + $title_length + 1;
-
-    # In this file, the trivia has that made it to the final round and is eligible
-    # for going on Twitter, will be saved:
-    $saved_trivia = 'saved_trivia.txt';
+    
+    # Make a hashtag out of the title, eg. #jamiefoxx, #theapartment
+    # Replace the whitespaces with nothing.
+    # !! There must be a better regex "flag" for this.
+    $title_as_hashtag = preg_replace('! !', "", $title_match[0]);
+    $title_as_hashtag = "#" . strtolower($title_as_hashtag);
+    $title_as_hashtag_length = strlen($title_as_hashtag);
 
     # Hashtags:
     define('FACT', '#fact');            # 5  char
     define('HOLLYWOOD', '#hollywood');  # 10 char
     define('MOVIE', '#movie');          # 6  char
     define('TRIVIA', '#trivia');        # 7  char
+
+    # Function that appends the movie title or person's name as a hashtag at the
+    # end of the tweet IF the overall final number of characters is under 140.
+    function append_title_as_hashtag() {
+        global $tweet;
+        global $tweet_length;
+        global $title_as_hashtag;
+        global $title_as_hashtag_length;
+
+        $tweet_length = strlen($tweet);
+        if ( ($tweet_length + $title_as_hashtag_length) <= 140) {
+            $tweet = $tweet . " " . $title_as_hashtag;
+        }
+    }
+
+    # Do another character count and let's post the final tweet to Twitter if
+    # under 140. Otherwise reload the script.
+    function post_tweet_or_reload() {
+        global $tweet;
+        global $statuses;
+        global $connection;
+
+        if ($tweet > 140) {
+            reload;
+        }
+        else {
+            $statuses = $connection->post("statuses/update", ["status" => $tweet]);
+        }
+    }
+
+    # Put the tweet into a file, separate them with newlines:
+    function save_trivia_to_file() {
+        # In this file, the trivia has that made it to the final round and is eligible
+        # for going on Twitter, will be saved:
+        $saved_trivia = 'saved_trivia.txt';
+        global $tweet;
+        file_put_contents($saved_trivia, $tweet . PHP_EOL, FILE_APPEND);
+    }
+
     
+    # Final round!
+    # ------------
     # Check if the end value is Twitter-friendly.
-    # (Twitter URL shortener creates 23 character long addresses.)
+    # Note: Twitter URL shortener creates 23 character long strings.
+    # If the character length lets it, append one or more hashtags plus the url,
+    # plus the title as hashtag at the end of the tweet. If it has too many
+    # characters just send it without hashtags.
+    # Then save every successful tweet in a file.
+    # If the tweet can not be sent out, reload everything.
+
     # If less than 15 characters, skip it, reload:
     if ($char_length <= 15) {
         $tweet = "Too short.";
         reload();
     }
     # Title + trivia more than 15 and less than 101 chars, append two hashtags and the current URL to it:
-    elseif ($char_length >= 16 && $char_length <= 101) {
+    elseif ($char_length >= 15 && $char_length <= 101) {
         $tweet = $title_match[0] . ": " . $trivia_replace2 . " " . MOVIE . " " . TRIVIA . " " . $target_url;
-        $statuses = $connection->post("statuses/update", ["status" => $tweet]);
-        file_put_contents($saved_trivia, $tweet . PHP_EOL, FILE_APPEND);
+        append_title_as_hashtag();
+        post_tweet_or_reload();
+        save_trivia_to_file();
     }
     # If the title + trivia is between  101 and 115 chars, tweet with 1 hashtag and a link:
     elseif ($char_length >= 101 && $char_length <= 115) {
         $tweet = $title_match[0] . ": " . $trivia_replace2 . " " . TRIVIA . " " . $target_url;
-        $statuses = $connection->post("statuses/update", ["status" => $tweet]);
-        file_put_contents($saved_trivia, $tweet . PHP_EOL, FILE_APPEND);
+        append_title_as_hashtag();
+        post_tweet_or_reload();
+        save_trivia_to_file();
     }
-    # If the title + trivia is between  120 and 138 chars, tweet without link and hashtag:
+    # If the title + trivia is between  116 and 138 chars, tweet without link and hashtag:
     elseif ($char_length >= 116 && $char_length <= 138) {
         $tweet = $title_match[0] . ": " . $trivia_replace2;
-        $statuses = $connection->post("statuses/update", ["status" => $tweet]);
-        file_put_contents($saved_trivia, $tweet . PHP_EOL, FILE_APPEND);
+        append_title_as_hashtag();
+        post_tweet_or_reload();
+        save_trivia_to_file();
     }
     # Or reload...
     else {
@@ -251,7 +307,10 @@
     echo "<h3>This goes on Twitter:</h3> <h2>" . $tweet . "</h2>";
     echo "<p>" . $trivia_replace2 . "</p>";
     echo "<p>URL in use: <a target=\"_blank\" href=\"" . $target_url . "\">" . $target_url . "</a></p>";
-    echo "<p>Trivia saved into file.</p>"
+    echo "<p>Trivia saved into file.</p>";
+    
+    echo "<h1>Final tweet length: $tweet_length</h1>";
+    echo "<h1>$title_as_hashtag / $title_as_hashtag_length</h1>";
 ?>
         <!--
         <section style="width: 25%;">
