@@ -234,7 +234,7 @@
         global $connection;
 
         if ($tweet > 140) {
-            reload;
+            reload();
         }
         else {
             # Include the file that contains the authorization details for Twitter:
@@ -307,7 +307,7 @@
     echo "<p>" . $trivia_replace2 . "</p>";
     echo "<p>URL in use: <a target=\"_blank\" href=\"" . $target_url . "\">" . $target_url . "</a></p>";
     echo "<p>Trivia saved into file.</p>";
-    
+
     echo "<h1>Final tweet length: $tweet_length</h1>";
     echo "<h1>$title_as_hashtag / $title_as_hashtag_length</h1>";
 ?>
