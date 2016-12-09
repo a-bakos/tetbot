@@ -99,9 +99,6 @@
     # reload(mt_rand(1800,7200)); # anytime between 30mins - 2hours
     reload(mt_rand(600,7200)); # anytime between 10mins - 2hours
 
-    # Include the file that contains the authorization details for Twitter:
-    include "auth.php";
-
     # Load the files into an array for further processing:
     $files = array();
         $files[0] = 'names.txt';
@@ -240,6 +237,8 @@
             reload;
         }
         else {
+            # Include the file that contains the authorization details for Twitter:
+            include('auth.php');
             $statuses = $connection->post("statuses/update", ["status" => $tweet]);
         }
     }
