@@ -33,9 +33,9 @@
  * Pick the file.
  * A file will be selected randomly, either "names.txt" or "movies.txt".
  * From the selected file, an item (ID) will also be picked randomly.
- * 
+ *
  * Build the url.
- * The proper url gets created according to the picked item (ID). The url of a 
+ * The proper url gets created according to the picked item (ID). The url of a
  * movie's page or a person's bio page are slightly different.
  *
  * Find trivia.
@@ -68,7 +68,7 @@
  * character-count is below 15, skip everything and reload the script -- it can't
  * be a sensible message.
  * Then, there are different rules for various character lengths.
- * Twitter lets 140 characters in a tweet, and its built-in url shortener will 
+ * Twitter lets 140 characters in a tweet, and its built-in url shortener will
  * reduce any urls down to 23 character.
  * So, count everything in every condition and if the number of characters lets
  * it, append one or more hashtags at the end of the tweet, plus the IMDB url of
@@ -85,7 +85,7 @@
  * That's it for now.
  *
  * Created by Attila Bakos (abakos.info)
- * 
+ *
  * 2016, Plymouth, UK
  */
 
@@ -133,7 +133,8 @@
     # <... class="sode odd | even">trivia here<br />
     # Movie title trivia looks like this in the source code:
     # <... class="sodatext">actual trivia here  </div> (note the two spaces)
-    # In the regex pattern: (?<=...) will match things that is preceded by: sodatext">
+    # In the regex pattern: (?<=sodatext">) will match things that is preceded by:
+    # sodatext">
 
     # Modifiers: siU
     # s => makes the period to match newlines (by default it doesn't)
@@ -249,7 +250,8 @@
         # for going on Twitter, will be saved:
         $saved_trivia = 'saved_trivia.txt';
         global $tweet;
-        file_put_contents($saved_trivia, $tweet . PHP_EOL, FILE_APPEND);
+        # Date would look like this: 14 Dec 2016 18:35:43
+        file_put_contents($saved_trivia, date('j M Y H:i:s') . " " . $tweet . PHP_EOL, FILE_APPEND);
     }
 
     
