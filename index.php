@@ -97,17 +97,16 @@
         header("Refresh: " . $delay . "; URL=$site_url");
     }
 
-
+    # Script refreshing options
+    # 1. Random
     # Refresh the page with randomized timegaps (defined in seconds):
-    #reload(mt_rand(1800,7200)); # anytime between 30mins - 2hours
-    #reload(mt_rand(600,7200)); # anytime between 10mins - 2hours
-
-    reload(mt_rand(60,3600)); # anytime between 1min - 1hour
-
-    /*
+    # reload(mt_rand(1800,7200)); # anytime between 30mins - 2hours
+    # reload(mt_rand(600,7200)); # anytime between 10mins - 2hours
+    # 2. Constant
     # Rerun the script every 10 minutes:
-    reload(600);
-    */
+    # reload(600);
+
+    reload(mt_rand(60,1800)); # anytime between 1min - 30mins
 
 
 
