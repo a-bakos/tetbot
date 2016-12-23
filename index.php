@@ -108,8 +108,36 @@
 
     reload(mt_rand(60,1800)); # anytime between 1min - 30mins
 
+  # Switch for running the script fully randomized or using the external files
+  $full_random_process = TRUE; # set to FALSE to use the external files
 
+  if ($full_random_process == TRUE) {
 
+    # This module generates "truly" random numbers for the IDs.
+    # Every ID is 7 digits long, starting with zeros if needed,
+    # so this code will prepend those zeros.
+    $random_number = mt_rand(1,9999999);
+    $random_number_digits = strlen($random_number);
+
+    if ($random_number_digits < 7) {
+      $digits_calc = 7 - $random_number_digits;
+      $add_zeros = str_repeat("0", $digits_calc);
+      $random_number = $add_zeros . $random_number;
+    }
+
+    #nm or tt
+    $choose_topic = array();
+      $choose_topic[0] = "nm"; # name
+      $choose_topic[1] = "tt"; # title
+
+    # Get a random topic from the array and concatenate with the random number:
+    $random_trivia_topic = $choose_topic[array_rand($choose_topic)];
+    $random_item = $random_trivia_topic . $random_number;
+
+  } # end of main if clause
+
+  else {
+    echo "<code>Reading values from external files.</code>";
     # Load the files into an array for further processing:
     $files = array();
         $files[0] = 'names.txt';
@@ -136,6 +164,8 @@
     # Example: tt0108778 (in movies.txt), nm0000151 (in names.txt)
     $random_item = $random_item_array[shuffle($random_item_array)];
     $random_item = trim($random_item);
+
+  } # end of main else clause
 
     # Build the url based on which item has been chosen above,
     # then find trivia according to the regular expressions
@@ -198,6 +228,12 @@
 
     # Get the random trivia from the matches:
     $random_trivia = $matches[0][shuffle($matches[0])];
+
+    # Double-check whether the chosen trivia does actually exist
+    if (strlen($random_trivia) <= 1) {
+      echo "<h4>No trivia here...</h4>";
+      reload();
+    }
 
     # Cut unnecessary HTML tags out:
     $trivia_replace1 = preg_replace('!<a href=".*">!', "", $random_trivia);
@@ -312,18 +348,17 @@
 
     # Print the things out
     # length:
-    echo "<h1>Char count: " . $char_length . "</h1>";
+    echo "<h4>Chosen ID: " . $random_item . "</h4>"; # Display the chosen item
+    echo "<h4>Char count: " . $char_length . "</h4>";
     # title:
     echo "<h1>Title: " . $title_match[0] . "</h1>";
-    echo "<hr />";
-    # trivia:
-    echo "<h2>Random trivia:</h2>";
-    echo "<h3>This goes on Twitter:</h3> <h2>" . $tweet . "</h2>";
     echo "<p>" . $trivia_replace2 . "</p>";
     echo "<p>URL in use: <a target=\"_blank\" href=\"" . $target_url . "\">" . $target_url . "</a></p>";
-
-    echo "<h1>Final tweet length: $tweet_length</h1>";
-    echo "<h1>$title_as_hashtag / $title_as_hashtag_length</h1>";
+    echo "<hr />";
+    # trivia:
+    echo "<h3>This goes on Twitter:</h3> <h2>" . $tweet . "</h2>";
+    echo "<h3>Final tweet length: $tweet_length</h3>";
+    echo "<h3>$title_as_hashtag / $title_as_hashtag_length</h3>";
 ?>
         <!--
         <section style="width: 25%;">
