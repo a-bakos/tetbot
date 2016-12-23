@@ -9,7 +9,8 @@
  * What it does - described briefly:
  * Reads IMDB's trivia section, picks a random fact from them, evaluates it based
  * on some criteria, and if those criteria are met, posts it to Twitter as a
- * tweet. Repeats it every ten minutes. (Formerly: randomly within set time
+ * tweet.
+ * Repeats it every ten minutes. (Formerly: randomly within set time
  * boundaries.)
  *
  * -------------------------
@@ -96,14 +97,19 @@
         header("Refresh: " . $delay . "; URL=$site_url");
     }
 
-    /*
-    # Refresh the page with randomized timegaps (defined in seconds):
-    # reload(mt_rand(1800,7200)); # anytime between 30mins - 2hours
-    #reload(mt_rand(600,7200)); # anytime between 10mins - 2hours
-    */
 
+    # Refresh the page with randomized timegaps (defined in seconds):
+    #reload(mt_rand(1800,7200)); # anytime between 30mins - 2hours
+    #reload(mt_rand(600,7200)); # anytime between 10mins - 2hours
+
+    reload(mt_rand(60,3600)); # anytime between 1min - 1hour
+
+    /*
     # Rerun the script every 10 minutes:
     reload(600);
+    */
+
+
 
     # Load the files into an array for further processing:
     $files = array();
@@ -214,6 +220,7 @@
     $title_as_hashtag_length = strlen($title_as_hashtag);
 
     # Hashtags:
+    define('FILM', '#film');            # 5  char
     define('FACT', '#fact');            # 5  char
     define('HOLLYWOOD', '#hollywood');  # 10 char
     define('MOVIE', '#movie');          # 6  char
@@ -258,6 +265,7 @@
         global $tweet;
         # Date would look like this: 14 Dec 2016 18:35:43
         file_put_contents($saved_trivia, date('j M Y H:i:s') . " " . $tweet . PHP_EOL, FILE_APPEND);
+        echo "<p>Trivia saved into file.</p>";
     }
 
     
@@ -314,7 +322,6 @@
     echo "<h3>This goes on Twitter:</h3> <h2>" . $tweet . "</h2>";
     echo "<p>" . $trivia_replace2 . "</p>";
     echo "<p>URL in use: <a target=\"_blank\" href=\"" . $target_url . "\">" . $target_url . "</a></p>";
-    echo "<p>Trivia saved into file.</p>";
 
     echo "<h1>Final tweet length: $tweet_length</h1>";
     echo "<h1>$title_as_hashtag / $title_as_hashtag_length</h1>";
