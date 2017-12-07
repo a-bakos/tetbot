@@ -109,7 +109,7 @@
     reload(mt_rand(60,1800)); # anytime between 1min - 30mins
 
   # Switch for running the script fully randomized or using the external files
-  $full_random_process = TRUE; # set to FALSE to use the external files
+  $full_random_process = false; # set to FALSE to use the external files
 
   if ($full_random_process == TRUE) {
 
@@ -246,7 +246,7 @@
     $title_length = strlen($title_match[0]);
     $trivia_length = strlen($trivia_replace2);
     $char_length = $trivia_length + $title_length + 1;
-    
+
     # Make a hashtag out of the title, eg. #jamiefoxx, #theapartment
     # Replace the whitespaces with nothing.
     # !! There must be a better regex "flag" for this.
@@ -303,7 +303,7 @@
         echo "<p>Trivia saved into file.</p>";
     }
 
-    
+
     # Final round!
     # ------------
     # Check if the end value is Twitter-friendly.
@@ -360,10 +360,6 @@
     echo "<h3>Final tweet length: $tweet_length</h3>";
     echo "<h3>$title_as_hashtag / $title_as_hashtag_length</h3>";
 ?>
-        <!--
-        <section style="width: 25%;">
-            <a class="twitter-timeline" href="https://twitter.com/abakostbot">Tweets by abakostbot</a> <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
-        </section>
-        -->
+
     </body>
 </html>
